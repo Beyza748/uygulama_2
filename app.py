@@ -39,7 +39,8 @@ HTML="""
 """
 
 def connect_db():
-  conn = psycop2.connect(DATABASE_URL)
+  conn = psycopg
+    2.connect(DATABASE_URL)
   return conn
   
 @app.route("/" , methods=["GET", "POST"])
