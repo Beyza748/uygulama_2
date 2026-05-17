@@ -1,11 +1,13 @@
-from flask import Flask , render_template_string , request
 import os
 import psycopg2
+from flask import Flask, render_template_string, request
 
 app = Flask(__name__)
 
-DATABASE_URL = os.getenv("DATABASE_URL" , "https://uygulama-2.onrender.com")
-HTML="""
+# Render veritabanı adresini otomatik yükler, yoksa yerel test için boş bırakırız
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+HTML = """
 <!doctype html>
 <html>
 <head>
@@ -18,7 +20,6 @@ HTML="""
     button { padding: 10px 15px; background: #4CAF50; color: white; border:none; border-radius: 6px; cursor:pointer; }
     ul { list-style: none; padding: 0px; }
     li { background: white; margin: 5px auto; width: 200px; padding: 8px; border-radius: 5px; }
-    
     </style>
 </head>
 <body>
@@ -39,28 +40,29 @@ HTML="""
 """
 
 def connect_db():
-  conn = psycopg
-  db_connection.connect(DATABASE_URL)
-  return conn
+    # Hatalı kısım düzeltildi: psycopg2 ile doğrudan bağlantı açıyoruz
+    return psycopg2.connect(DATABASE_URL)
   
-@app.route("/" , methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def index():
-  conn = connect_db()
-  cur = conn.cursor()
-  cur.execute("CREATE TABLE IF NOT EXISTS ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT)")
+    conn = connect_db()
+    cur = conn.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT)")
 
-  if request.method == "POST":
-      isim = request.form.get("isim")
-      if isim:
-          cur.execute("INSERT INTO ziyaretciler (isim) VALUES (%s)", (isim,))
-          conn.commit()
+    if request.method == "POST":
+        isim = request.form.get("isim")
+        if isim:
+            cur.execute("INSERT INTO ziyaretciler (isim) VALUES (%s)", (isim,))
+            conn.commit()
 
-  cur.execute("SELECT isim FROM ziyaretciler ORDER BY id DESC LIMIT 10")
-  isimler = [row[0] for row in cur.fetchall()]
+    cur.execute("SELECT isim FROM ziyaretciler ORDER BY id DESC LIMIT 10")
+    isimler = [row[0] for row in cur.fetchall()]
 
-  cur.close()
-  conn.close()
-  return render_template_string(HTML, isimler=isimler)
+    cur.close()
+    conn.close()
+    return render_template_string(HTML, isimler=isimler)
 
 if __name__ == "__main__":
-  app.run(host="0.0.0.0", port=5000)
+    # Render portunu dinamik olarak alıyoruz
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
