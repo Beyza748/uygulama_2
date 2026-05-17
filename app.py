@@ -4,14 +4,15 @@ from flask import Flask, render_template_string, request
 
 app = Flask(__name__)
 
-# Render veritabanı adresini otomatik yükler, yoksa yerel test için boş bırakırız
+# Render veritabanı adresini otomatik yükler
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Başlıklar ve içerik "Mono Hizmetli Selam!" olarak güncellendi
 HTML = """
 <!doctype html>
 <html>
 <head>
-    <title>Buluttan Selam!</title>
+    <title>Mono Hizmetli Selam!</title>
     <style>
     body { font-family: Arial; text-align: center; padding: 50px; background: #eef2f3; }
     h1 { color: #333; }
@@ -23,7 +24,7 @@ HTML = """
     </style>
 </head>
 <body>
-    <h1>Buluttan Selam!</h1>
+    <h1>Mono Hizmetli Selam!</h1>
     <p>Adını yaz, selamını bırak </p>
     <form method= "POST">
         <input type="text" name="isim" placeholder="Adını Yaz" required>
@@ -40,7 +41,6 @@ HTML = """
 """
 
 def connect_db():
-    # Hatalı kısım düzeltildi: psycopg2 ile doğrudan bağlantı açıyoruz
     return psycopg2.connect(DATABASE_URL)
   
 @app.route("/", methods=["GET", "POST"])
@@ -63,6 +63,5 @@ def index():
     return render_template_string(HTML, isimler=isimler)
 
 if __name__ == "__main__":
-    # Render portunu dinamik olarak alıyoruz
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
